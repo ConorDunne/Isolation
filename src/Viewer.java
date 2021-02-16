@@ -1,12 +1,16 @@
 import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.xml.soap.Text;
 
 import util.GameObject;
 
@@ -41,9 +45,13 @@ SOFTWARE.
 public class Viewer extends JPanel {
 	private long CurrentAnimationTime= 0;
 	Model gameworld =new Model();
+	private Random rand;
+	private float fuel;
 
 	public Viewer(Model World) {
 		this.gameworld=World;
+		this.rand = new Random();
+		this.fuel = 100;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -82,6 +90,14 @@ public class Viewer extends JPanel {
 		//Draw background
 		drawBackground(g);
 		drawPlayer(x, y, width, height, texture,g);
+
+		if(fuel < 10) {
+			fuel = 100;
+		}
+
+		fuel -= 0.2;
+
+		drawAura(x+(width/2), y+(height/2), fuel, "res/smoke.jpg", g);
 	}
 
 	private void drawBackground(Graphics g) {
@@ -95,7 +111,7 @@ public class Viewer extends JPanel {
 		}
 	}
 
-	private void drawPlayer(int x, int y, int width, int height, String texture,Graphics g) {
+	private void drawPlayer(int x, int y, int width, int height, String texture, Graphics g) {
 		File TextureToLoad = new File(texture);  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE
 		try {
 			Image myImage = ImageIO.read(TextureToLoad);
@@ -108,7 +124,45 @@ public class Viewer extends JPanel {
 			e.printStackTrace();
 		}
 	}
+
+	private void drawAura(int x, int y, float fuel, String texture, Graphics g) {
+		float opacity;
+		float f = (fuel + ((float) this.rand.nextInt(7)-3)/10 )/100;
+		File TextureToLoad = new File(texture);
+		Graphics2D g2d = (Graphics2D) g;
+
+		float radius = 250 * f;
+
+		if(f > 0.7f) {
+			opacity = 0.3f;
+		} else if(f < 0.3f) {
+			opacity = 0.7f;
+		} else {
+			opacity = 1-f;
+		}
+
+		try {
+			BufferedImage myImage = ImageIO.read(TextureToLoad);
+
+			Rectangle r = new Rectangle(0, 0, 960, 680);
+			Ellipse2D c = new Ellipse2D.Double(x-radius, y-radius, 2*radius, 2*radius);
+
+			Area a = new Area(r);
+			a.subtract(new Area(c));
+
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+			g2d.drawImage(myImage, 0, 0, null);
+
+			g2d.clip(a);
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+			g2d.drawImage(myImage, 0, 0, null);
+			g2d.dispose();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
+
 
 
 /*
@@ -125,7 +179,7 @@ public class Viewer extends JPanel {
       .. ........ZOZZ$7ZZNZZDNODDOMMMMND8$$77I??I?+?+=O .     .                 
       .. ...7$OZZ?788DDNDDDDD8ZZ7$$$7I7III7??I?????+++=+~.                      
        ...8OZII?III7II77777I$I7II???7I??+?I?I?+?+IDNN8??++=...                  
-     ....OOIIIII????II?I??II?I????I?????=?+Z88O77ZZO8888OO?++,......            
+     ....OOIIIII????II?I??II?I????I?????=?+Z88O77ZZO8888OO?++,......
       ..OZI7III??II??I??I?7ODM8NN8O8OZO8DDDDDDDDD8DDDDDDDDNNNOZ= ......   ..    
      ..OZI?II7I?????+????+IIO8O8DDDDD8DNMMNNNNNDDNNDDDNDDNNNNNNDD$,.........    
       ,ZII77II?III??????DO8DDD8DNNNNNDDMDDDDDNNDDDNNNDNNNNDNNNNDDNDD+.......   .
