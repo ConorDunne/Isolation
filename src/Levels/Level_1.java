@@ -3,7 +3,7 @@ package Levels;
 public class Level_1 extends Level implements Levels {
 
     public Level_1() {
-        super("res/Levels/Lvl_1_grid.png", 2295, -1349);
+        super("res/GUI/Levels/Lvl_1_grid.png", 2295, -1349);
 
         setBlockSize(12, 60, 680);
         setBase(3);
@@ -14,25 +14,25 @@ public class Level_1 extends Level implements Levels {
             return true;
         }
 
-        if(XPos > -(9*BlockWidthDimension)) {
+        if(XPos > -(9.75*BlockWidthDimension)) {
             if(y >= getBase(4)) {
                 return true;
             }
         }
 
-        if(XPos < -(15.5*BlockWidthDimension) && XPos > -(31*BlockWidthDimension)) {
+        if(XPos < -(15.5*BlockWidthDimension) && XPos > -(31.75*BlockWidthDimension)) {
             if(y >= getBase(4)) {
                 return true;
             }
         }
 
-        if(XPos > -(3*BlockWidthDimension)) {
+        if(XPos > -(3.75*BlockWidthDimension)) {
             if(y >= getBase(5)) {
                 return true;
             }
         }
 
-        if(XPos < -(21.5*BlockWidthDimension) && XPos > -(25*BlockWidthDimension)) {
+        if(XPos < -(21.5*BlockWidthDimension) && XPos > -(25.75*BlockWidthDimension)) {
             if(y >= getBase(5)) {
                 return true;
             }
@@ -42,25 +42,25 @@ public class Level_1 extends Level implements Levels {
     }
 
     public boolean wall(float x, float y) {
-        if(x > -(9*BlockWidthDimension)) {
+        if(x > -(9.75*BlockWidthDimension)) {
             if(y >= getBase(3.9f)) {
                 return true;
             }
         }
 
-        if(x < -(15.5*BlockWidthDimension) && x > -(31*BlockWidthDimension)) {
+        if(x < -(15.5*BlockWidthDimension) && x > -(31.75*BlockWidthDimension)) {
             if(y >= getBase(3.9f)) {
                 return true;
             }
         }
 
-        if(x > -(3*BlockWidthDimension)) {
+        if(x > -(3.75*BlockWidthDimension)) {
             if(y >= getBase(4.9f)) {
                 return true;
             }
         }
 
-        if(x < -(21.5*BlockWidthDimension) && x > -(25*BlockWidthDimension)) {
+        if(x < -(21.5*BlockWidthDimension) && x > -(25.75*BlockWidthDimension)) {
             if(y >= getBase(4.9f)) {
                 return true;
             }

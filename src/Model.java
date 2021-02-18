@@ -35,7 +35,7 @@ public class Model {
 	private Controller controller = Controller.getInstance();
 	private CopyOnWriteArrayList<GameObject> EnemiesList  = new CopyOnWriteArrayList<GameObject>();
 	private CopyOnWriteArrayList<GameObject> BulletList  = new CopyOnWriteArrayList<GameObject>();
-	private int Aura=0;
+	private float fuel;
 	private float PlayerYVelocity;
 	private float PlayerXVelocity;
 
@@ -45,6 +45,7 @@ public class Model {
 		Player = new GameObject("res/Character/idle/0.png",50,70,new Point3f(500,250,0));
 		PlayerYVelocity = 0;
 		PlayerXVelocity = 0;
+		this.fuel = 100;
 		Level = new Level_1();
 	}
 
@@ -57,7 +58,9 @@ public class Model {
 
 	private void gameLogic() {}
 
-	private void auraLogic() {}
+	private void auraLogic() {
+		fuel -= 0.2;
+	}
 
 	private void playerLogic() {
 		if(!Level.grounded(Player.getCentre().getY()) || PlayerYVelocity > 0) {
@@ -86,6 +89,18 @@ public class Model {
 
 	public Levels getLevel() {
 		return Level;
+	}
+
+	public float getFuel() {
+		return fuel;
+	}
+
+	public int gameState() {
+		if(fuel <= 0.0f) {
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 }
 

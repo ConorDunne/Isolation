@@ -10,7 +10,6 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-import javax.xml.soap.Text;
 
 import util.GameObject;
 
@@ -46,12 +45,10 @@ public class Viewer extends JPanel {
 	private long CurrentAnimationTime= 0;
 	Model gameworld =new Model();
 	private Random rand;
-	private float fuel;
 
 	public Viewer(Model World) {
 		this.gameworld=World;
 		this.rand = new Random();
-		this.fuel = 100;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -86,18 +83,13 @@ public class Viewer extends JPanel {
 		int width = (int) gameworld.getPlayer().getWidth();
 		int height = (int) gameworld.getPlayer().getHeight();
 		String texture = gameworld.getPlayer().getTexture();
+		float fuel = gameworld.getFuel();
 
 		//Draw background
 		drawBackground(g);
 		drawPlayer(x, y, width, height, texture,g);
 
-		if(fuel < 10) {
-			fuel = 100;
-		}
-
-		fuel -= 0.2;
-
-		drawAura(x+(width/2), y+(height/2), fuel, "res/smoke.jpg", g);
+		drawAura(x+(width/2), y+(height/2), fuel, "res/GUI/Levels/smoke.jpg", g);
 	}
 
 	private void drawBackground(Graphics g) {
@@ -118,7 +110,8 @@ public class Viewer extends JPanel {
 			//The spirte is 32x32 pixel wide and 4 of them are placed together so we need to grab a different one each time
 			//remember your training :-) computer science everything starts at 0 so 32 pixels gets us to 31
 			//int currentPositionInAnimation= ((int) ((CurrentAnimationTime%40)/10))*32; //slows down animation so every 10 frames we get another frame so every 100ms
-			g.drawImage(myImage, x,y, x+width, y+height, 0  , 0, 32, 32, null);
+			g.drawRect(x, y, width, height);
+			g.drawImage(myImage, x,y, width, height, null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -154,7 +147,6 @@ public class Viewer extends JPanel {
 			g2d.drawImage(myImage, 0, 0, null);
 
 			g2d.clip(a);
-			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
 			g2d.drawImage(myImage, 0, 0, null);
 			g2d.dispose();
 		} catch (IOException e) {
