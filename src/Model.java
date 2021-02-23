@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import Levels.*;
@@ -32,6 +34,8 @@ SOFTWARE.
 public class Model {
 	private GameObject Player;
 	private Levels Level;
+	private int lastLevel = 2;
+	private int lvl;
 	private Controller controller = Controller.getInstance();
 	private CopyOnWriteArrayList<GameObject> EnemiesList  = new CopyOnWriteArrayList<GameObject>();
 	private CopyOnWriteArrayList<GameObject> BulletList  = new CopyOnWriteArrayList<GameObject>();
@@ -39,47 +43,99 @@ public class Model {
 	private float PlayerYVelocity;
 	private float PlayerXVelocity;
 
+	private boolean canMove;
+
 	public Model() {
-		//setup game world
-		//Player
+		lvl = 1;
+		levelSetup();
+	}
+
+	public void levelSetup() {
 		Player = new GameObject("res/Character/idle/0.png",50,70,new Point3f(500,250,0));
 		PlayerYVelocity = 0;
 		PlayerXVelocity = 0;
 		this.fuel = 100;
-		Level = new Level_1();
+		this.canMove = false;
+
+		switch (lvl) {
+			case 1:
+				Level = new Level_1();
+				break;
+			case 2:
+				Level = new Level_2();
+				break;
+		}
 	}
 
 	// This is the heart of the game , where the model takes in all the inputs ,decides the outcomes and then changes the model accordingly.
 	public void gamelogic() {
 		playerLogic();
 		auraLogic();
+		collisionLogic();
 		gameLogic();
 	}
 
-	private void gameLogic() {}
+	private void collisionLogic() {
+		List<GameObject> oil = Level.getOil();
+		List<GameObject> remove = new ArrayList<>();
+
+		for (GameObject o : oil) {
+			int xDist = Level.getXPos() + o.getXPos() - 500;
+			int yDist = (int) Player.getCentre().getY() - o.getYPos();
+
+			int dist = Math.abs(xDist) + Math.abs(yDist);
+
+			if (dist < 50) {
+				fuel = 100;
+				remove.add(o);
+			}
+		}
+
+		for(GameObject o : remove) {
+			oil.remove(o);
+		}
+	}
+
+	private void gameLogic() {
+		if(getLevel().levelComplete() && lvl != lastLevel) {
+			lvl++;
+			levelSetup();
+		} else if(getLevel().levelComplete()) {
+			fuel = 1000;
+		}
+	}
 
 	private void auraLogic() {
-		fuel -= 0.2;
+		fuel -= 0.1;
 	}
 
 	private void playerLogic() {
-		if(!Level.grounded(Player.getCentre().getY()) || PlayerYVelocity > 0) {
-			PlayerYVelocity = PlayerYVelocity - 0.1f;
-			Player.getCentre().ApplyVector(new Vector3f(0, PlayerYVelocity, 0));
+		if(!canMove) {	//	Restricts player movement until they touch the ground for the first time.
+			if (!Level.grounded(Player.getCentre().getY())) {
+				PlayerYVelocity = PlayerYVelocity - 0.1f;
+				Player.getCentre().ApplyVector(new Vector3f(0, PlayerYVelocity, 0));
+			} else {
+				canMove = true;
+			}
 		} else {
-			PlayerYVelocity = 0;
-		}
+			if (!Level.grounded(Player.getCentre().getY()) || PlayerYVelocity > 0) {
+				PlayerYVelocity = PlayerYVelocity - 0.1f;
+				Player.getCentre().ApplyVector(new Vector3f(0, PlayerYVelocity, 0));
+			} else {
+				PlayerYVelocity = 0;
+			}
 
-		if(Controller.getInstance().isKeyAPressed() && !Level.wall(Level.getXPos()+1, Player.getCentre().getY())) {
-			Level.moveLeft();
-		}
+			if (Controller.getInstance().isKeyAPressed() && !Level.wall(Level.getXPos() + 1, Player.getCentre().getY())) {
+				Level.moveLeft();
+			}
 
-		if(Controller.getInstance().isKeyDPressed() && !Level.wall(Level.getXPos()-1, Player.getCentre().getY())) {
-			Level.moveRight();
-		}
+			if (Controller.getInstance().isKeyDPressed() && !Level.wall(Level.getXPos() - 1, Player.getCentre().getY())) {
+				Level.moveRight();
+			}
 
-		if(Controller.getInstance().isKeySpacePressed() && Level.grounded(Player.getCentre().getY())) {
-			PlayerYVelocity = 4;
+			if (Controller.getInstance().isKeySpacePressed() && Level.grounded(Player.getCentre().getY())) {
+				PlayerYVelocity = 4;
+			}
 		}
 	}
 
@@ -98,6 +154,8 @@ public class Model {
 	public int gameState() {
 		if(fuel <= 0.0f) {
 			return -1;
+		} else if (fuel == 1000) {
+			return 1;
 		} else {
 			return 0;
 		}

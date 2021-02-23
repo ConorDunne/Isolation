@@ -1,5 +1,9 @@
 package Levels;
 
+import util.GameObject;
+
+import java.util.List;
+
 public interface Levels {
     String getBackground();
     int getScale();
@@ -8,4 +12,6 @@ public interface Levels {
     void moveLeft();
     boolean grounded(float y);
     boolean wall(float x, float y);
+    boolean levelComplete();
+    List<GameObject> getOil();
 }

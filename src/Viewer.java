@@ -1,17 +1,17 @@
+import javafx.scene.text.Text;
+import util.GameObject;
+
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Random;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
-import javax.swing.Timer;
-
-import util.GameObject;
 
 
 /*
@@ -85,14 +85,41 @@ public class Viewer extends JPanel {
 		String texture = gameworld.getPlayer().getTexture();
 		float fuel = gameworld.getFuel();
 
-		//Draw background
 		drawBackground(g);
+		drawMap(g);
+		drawOil(g);
 		drawPlayer(x, y, width, height, texture,g);
 
 		drawAura(x+(width/2), y+(height/2), fuel, "res/GUI/Levels/smoke.jpg", g);
 	}
 
+	private void drawOil(Graphics g) {
+		List<GameObject> oil = gameworld.getLevel().getOil();
+
+		for(GameObject o : oil) {
+			File TextureToLoad = new File(o.getTexture());
+
+			try {
+				Image OilImg = ImageIO.read(TextureToLoad);
+				g.drawImage(OilImg, gameworld.getLevel().getXPos() + o.getXPos(), o.getYPos(), 50, 50, null);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private void drawBackground(Graphics g) {
+		File TextureToLoad = new File("res/GUI/Levels/parallax-demon-woods.png");
+
+		try {
+			Image background = ImageIO.read(TextureToLoad);
+			g.drawImage(background, 0, 0, 960, 680, null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void drawMap(Graphics g) {
 		File TextureToLoad = new File(gameworld.getLevel().getBackground());  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE
 		try {
 			Image myImage = ImageIO.read(TextureToLoad);

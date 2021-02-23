@@ -30,15 +30,27 @@ public class GameObject {
 	private boolean hasTextured=false;
 	private String textureLocation; 
 	private String blanktexture="res/Default/blankSprite.png";
+	private int mapCoords[];
 	
 	public GameObject() {}
 	
-    public GameObject(String textureLocation,int width,int height,Point3f centre) { 
+    public GameObject(String textureLocation, int width, int height, Point3f centre) {
     	 hasTextured=true;
     	 this.textureLocation=textureLocation;
     	 this.width=width;
 		 this.height=height;
 		 this.centre=centre;
+	}
+
+	public GameObject(String textureLocation, int width, int height, int xPos, int yPos) {
+		hasTextured=true;
+		this.textureLocation=textureLocation;
+		this.width=width;
+		this.height=height;
+		mapCoords = new int[2];
+
+		mapCoords[0] = xPos;
+		mapCoords[1] = yPos;
 	}
 
 	public Point3f getCentre() {
@@ -56,6 +68,14 @@ public class GameObject {
 
 	public int getHeight() {
 		return height;
+	}
+
+	public int getXPos() {
+		return mapCoords[0];
+	}
+
+	public int getYPos() {
+		return mapCoords[1];
 	}
 
 	public String getTexture() {

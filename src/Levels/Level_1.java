@@ -1,12 +1,24 @@
 package Levels;
 
+import util.GameObject;
+
+import java.util.ArrayList;
+
 public class Level_1 extends Level implements Levels {
 
     public Level_1() {
         super("res/GUI/Levels/Lvl_1_grid.png", 2295, -1349);
 
+        setOil();
         setBlockSize(12, 60, 680);
         setBase(3);
+    }
+
+    private void setOil() {
+        oil = new ArrayList<>();
+        String texture = "res/GUI/Levels/oil.png";
+
+        oil.add(new GameObject(texture, 25, 25, 1250, 400));
     }
 
     public boolean grounded(float y) {

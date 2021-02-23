@@ -1,3 +1,4 @@
+import com.sun.media.jfxmediaimpl.platform.Platform;
 import util.GameObject;
 import util.UnitTests;
 
@@ -50,15 +51,18 @@ public class MainWindow {
 	private static JLabel BackgroundImageForStartMenu;
 	private static JLabel Title;
 	private static JButton playButton;
+	private static JButton exitButton;
 
 	public MainWindow() {
 		frame.setSize(FrameWidth, FrameHeight);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(null);
+		frame.setResizable(false);
 
 		File Background = new File("res/GUI/Menu/Stars.png");  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE
 		File title = new File("res/GUI/Menu/Title.png");
 		File play = new File("res/GUI/Menu/play.png");
+		File exit = new File("res/GUI/Menu/exit.png");
 
 		try {
 			BufferedImage playImage = ImageIO.read(play);
@@ -68,24 +72,36 @@ public class MainWindow {
 			playButton = new JButton(new ImageIcon(dimg));
 			playButton.setBorder(BorderFactory.createEmptyBorder());
 			playButton.setContentAreaFilled(false);
-			playButton.setBounds(390, 400, 195, 80);
+			playButton.setBounds(98, 400, 288, 80);
 			frame.add(playButton);
 		}  catch (IOException e) {
 			e.printStackTrace();
 		}
 
 		try {
-			BufferedImage titleImage = ImageIO.read(title);
+			BufferedImage playImage = ImageIO.read(exit);
 
-			Image dimg = titleImage.getScaledInstance(780, 200, Image.SCALE_SMOOTH);
+			Image dimg = playImage.getScaledInstance(200, 80, Image.SCALE_SMOOTH);
 
-			Title = new JLabel(new ImageIcon(dimg));
-			Title.setBounds(100, 100, 780, 200);
-		frame.add(Title);
+			exitButton = new JButton(new ImageIcon(dimg));
+			exitButton.setBorder(BorderFactory.createEmptyBorder());
+			exitButton.setContentAreaFilled(false);
+			exitButton.setBounds(576, 400, 288, 80);
+			frame.add(exitButton);
 		}  catch (IOException e) {
 			e.printStackTrace();
 		}
 
+		try {
+			BufferedImage titleImage = ImageIO.read(title);
+			Image dimg = titleImage.getScaledInstance(780, 200, Image.SCALE_SMOOTH);
+
+			Title = new JLabel(new ImageIcon(dimg));
+			Title.setBounds(100, 100, 780, 200);
+			frame.add(Title);
+		}  catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		try {
 			BufferedImage myPicture = ImageIO.read(Background);
@@ -96,9 +112,16 @@ public class MainWindow {
 			e.printStackTrace();
 		}
 
+		exitButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+
 		playButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				playButton.setVisible(false);
+				exitButton.setVisible(false);
 				BackgroundImageForStartMenu.setVisible(false);
 				Title.setVisible(false);
 
@@ -116,7 +139,7 @@ public class MainWindow {
 		frame.add(gameCanvas);
 
 		gameCanvas.setBounds(0, 0, FrameWidth, FrameHeight);
-		gameCanvas.setBackground(new Color(255,255,255)); //white background  replaced by Space background but if you remove the background method this will draw a white screen
+		gameCanvas.setBackground(new Color(255, 255, 255)); //white background  replaced by Space background but if you remove the background method this will draw a white screen
 		gameCanvas.setVisible(true);
 		gameCanvas.addKeyListener(Controller);    //adding the controller to the Canvas
 		gameCanvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
@@ -138,17 +161,23 @@ public class MainWindow {
 			} else if(gameState == -1) {
 				gameCanvas.setVisible(false);
 				playButton.setVisible(true);
+				exitButton.setVisible(true);
 				BackgroundImageForStartMenu.setVisible(true);
 				Title.setVisible(true);
 			} else if(gameState == 1) {
-				/*
-					Start Credits
-				 */
+				gameCanvas.setVisible(false);
+				BackgroundImageForStartMenu.setVisible(true);
+				rollCredits();
+				gameState = -2;
 			}
 
 			//UNIT test to see if framerate matches
 			UnitTests.CheckFrameRate(System.currentTimeMillis(),FrameCheck, TargetFPS);
 		}
+	}
+
+	private static void rollCredits() {
+
 	}
 
 	//Basic Model-View-Controller pattern
