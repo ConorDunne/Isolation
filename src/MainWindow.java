@@ -1,5 +1,3 @@
-import com.sun.media.jfxmediaimpl.platform.Platform;
-import util.GameObject;
 import util.UnitTests;
 
 import java.awt.*;

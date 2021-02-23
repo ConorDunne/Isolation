@@ -1,4 +1,3 @@
-import javafx.scene.text.Text;
 import util.GameObject;
 
 import java.awt.*;
