@@ -1,11 +1,16 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import Levels.*;
+import Levels.Level_1;
+import Levels.Level_2;
+import Levels.Levels;
 import util.GameObject;
 import util.Point3f;
 import util.Vector3f;
+
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /*
 * Created by Abraham Campbell on 15/01/2020.
@@ -34,24 +39,44 @@ SOFTWARE.
 public class Model {
 	private GameObject Player;
 	private Levels Level;
-	private int lastLevel = 2;
+	private final int lastLevel = 2;
 	private int lvl;
-	private Controller controller = Controller.getInstance();
-	private CopyOnWriteArrayList<GameObject> EnemiesList  = new CopyOnWriteArrayList<GameObject>();
-	private CopyOnWriteArrayList<GameObject> BulletList  = new CopyOnWriteArrayList<GameObject>();
+	private final Controller controller = Controller.getInstance();
+	private final CopyOnWriteArrayList<GameObject> EnemiesList = new CopyOnWriteArrayList<>();
+	private final CopyOnWriteArrayList<GameObject> BulletList = new CopyOnWriteArrayList<>();
 	private float fuel;
 	private float PlayerYVelocity;
 	private float PlayerXVelocity;
+	private Clip Bubble;
+	private Clip Jump;
 
 	private boolean canMove;
 
 	public Model() {
 		lvl = 1;
+
+		File bubble = new File("res/Audio/Effects/Bubble.wav");
+		File jump = new File("res/Audio/Effects/Jump.wav");
+
+		try {
+			AudioInputStream bubbleAudio = AudioSystem.getAudioInputStream(bubble);
+			DataLine.Info gInfo = new DataLine.Info(Clip.class, bubbleAudio.getFormat());
+			Bubble = (Clip) AudioSystem.getLine(gInfo);
+			Bubble.open(bubbleAudio);
+
+			AudioInputStream jumpAudio = AudioSystem.getAudioInputStream(jump);
+			DataLine.Info dInfo = new DataLine.Info(Clip.class, jumpAudio.getFormat());
+			Jump = (Clip) AudioSystem.getLine(dInfo);
+			Jump.open(jumpAudio);
+		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+			e.printStackTrace();
+		}
+
 		levelSetup();
 	}
 
 	public void levelSetup() {
-		Player = new GameObject("res/Character/idle/0.png",50,70,new Point3f(500,250,0));
+		Player = new GameObject("res/Character/idle/", 50, 70, new Point3f(500, 250, 0));
 		PlayerYVelocity = 0;
 		PlayerXVelocity = 0;
 		this.fuel = 100;
@@ -88,6 +113,8 @@ public class Model {
 			if (dist < 50) {
 				fuel = 100;
 				remove.add(o);
+				Bubble.setMicrosecondPosition(0);
+				Bubble.start();
 			}
 		}
 
@@ -135,6 +162,8 @@ public class Model {
 
 			if (Controller.getInstance().isKeySpacePressed() && Level.grounded(Player.getCentre().getY())) {
 				PlayerYVelocity = 4;
+				Jump.setMicrosecondPosition(0);
+				Jump.start();
 			}
 		}
 	}
@@ -153,7 +182,7 @@ public class Model {
 
 	public int gameState() {
 		if(fuel <= 0.0f) {
-			return -1;
+			return -2;
 		} else if (fuel == 1000) {
 			return 1;
 		} else {

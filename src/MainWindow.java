@@ -1,13 +1,15 @@
 import util.UnitTests;
 
+import javax.imageio.ImageIO;
+import javax.sound.sampled.*;
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
 
 /*
  * Created by Abraham Campbell on 15/01/2020.
@@ -32,24 +34,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
    
    (MIT LICENSE ) e.g do what you want with this :-) 
- */ 
-
+ */
 
 
 public class MainWindow {
-	private static int FrameWidth = 960;
-	private static int FrameHeight = 680;
+	private static final int FrameWidth = 960;
+	private static final int FrameHeight = 680;
 
-	private static JFrame frame = new JFrame("Isolation");   // Change to the name of your game
+	private static final JFrame frame = new JFrame("Isolation");   // Change to the name of your game
 	private static Model gameworld;
 	private static Viewer gameCanvas;
-	private KeyListener Controller = new Controller()  ;
-	private static int TargetFPS = 100;
-	private static int gameState = -2;
+	private static final int TargetFPS = 100;
+	private static int gameState = -3;
+	private static JLabel Credits;
 	private static JLabel BackgroundImageForStartMenu;
 	private static JLabel Title;
+	private static Clip menuMusic;
 	private static JButton playButton;
 	private static JButton exitButton;
+	private static Clip gameMusic;
+	private static Clip deathMusic;
+	private final KeyListener Controller = new Controller();
 
 	public MainWindow() {
 		frame.setSize(FrameWidth, FrameHeight);
@@ -61,6 +66,11 @@ public class MainWindow {
 		File title = new File("res/GUI/Menu/Title.png");
 		File play = new File("res/GUI/Menu/play.png");
 		File exit = new File("res/GUI/Menu/exit.png");
+		File cr = new File("res/GUI/Menu/Credits.png");
+
+		File menu = new File("res/Audio/Music/Isolation.wav");
+		File game = new File("res/Audio/Music/Go_Alone.wav");
+		File death = new File("res/Audio/Effects/Death.wav");
 
 		try {
 			BufferedImage playImage = ImageIO.read(play);
@@ -77,9 +87,9 @@ public class MainWindow {
 		}
 
 		try {
-			BufferedImage playImage = ImageIO.read(exit);
+			BufferedImage exitImage = ImageIO.read(exit);
 
-			Image dimg = playImage.getScaledInstance(200, 80, Image.SCALE_SMOOTH);
+			Image dimg = exitImage.getScaledInstance(200, 80, Image.SCALE_SMOOTH);
 
 			exitButton = new JButton(new ImageIcon(dimg));
 			exitButton.setBorder(BorderFactory.createEmptyBorder());
@@ -97,7 +107,18 @@ public class MainWindow {
 			Title = new JLabel(new ImageIcon(dimg));
 			Title.setBounds(100, 100, 780, 200);
 			frame.add(Title);
-		}  catch (IOException e) {
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			BufferedImage img = ImageIO.read(cr);
+			Image dimg = img.getScaledInstance(800, 900, Image.SCALE_SMOOTH);
+
+			Credits = new JLabel(new ImageIcon(dimg));
+			frame.add(Credits);
+			Credits.setVisible(false);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -106,7 +127,26 @@ public class MainWindow {
 			BackgroundImageForStartMenu = new JLabel(new ImageIcon(myPicture));
 			BackgroundImageForStartMenu.setBounds(0, 0, FrameWidth, FrameHeight);
 			frame.add(BackgroundImageForStartMenu);
-		}  catch (IOException e) {
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			AudioInputStream menuAudio = AudioSystem.getAudioInputStream(menu);
+			DataLine.Info mInfo = new DataLine.Info(Clip.class, menuAudio.getFormat());
+			menuMusic = (Clip) AudioSystem.getLine(mInfo);
+			menuMusic.open(menuAudio);
+
+			AudioInputStream gameAudio = AudioSystem.getAudioInputStream(game);
+			DataLine.Info gInfo = new DataLine.Info(Clip.class, gameAudio.getFormat());
+			gameMusic = (Clip) AudioSystem.getLine(gInfo);
+			gameMusic.open(gameAudio);
+
+			AudioInputStream deathAudio = AudioSystem.getAudioInputStream(death);
+			DataLine.Info dInfo = new DataLine.Info(Clip.class, deathAudio.getFormat());
+			deathMusic = (Clip) AudioSystem.getLine(dInfo);
+			deathMusic.open(deathAudio);
+		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
 			e.printStackTrace();
 		}
 
@@ -128,45 +168,48 @@ public class MainWindow {
 		});
 
 		frame.setVisible(true);
-	}
-
-	private void startGame() {
-		gameworld = new Model();
-		gameCanvas = new Viewer(gameworld);
-
-		frame.add(gameCanvas);
-
-		gameCanvas.setBounds(0, 0, FrameWidth, FrameHeight);
-		gameCanvas.setBackground(new Color(255, 255, 255)); //white background  replaced by Space background but if you remove the background method this will draw a white screen
-		gameCanvas.setVisible(true);
-		gameCanvas.addKeyListener(Controller);    //adding the controller to the Canvas
-		gameCanvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
-		gameState = 0;
+		menuMusic.setMicrosecondPosition(0);
+		menuMusic.start();
 	}
 
 	public static void main(String[] args) {
 		MainWindow window = new MainWindow();
 
 		while(true) {
-			int TimeBetweenFrames =  1000 / TargetFPS;
+			int TimeBetweenFrames = 1000 / TargetFPS;
 			long FrameCheck = System.currentTimeMillis() + (long) TimeBetweenFrames;
 
 			//wait till next time step
-			while (FrameCheck > System.currentTimeMillis()){}
+			while (FrameCheck > System.currentTimeMillis()) {
+			}
 
-			if(gameState == 0) {
+			if (gameState == 0) {
 				gameloop();
-			} else if(gameState == -1) {
+			} else if (gameState == -1) {
 				gameCanvas.setVisible(false);
 				playButton.setVisible(true);
 				exitButton.setVisible(true);
 				BackgroundImageForStartMenu.setVisible(true);
 				Title.setVisible(true);
-			} else if(gameState == 1) {
+
+				gameMusic.stop();
+				menuMusic.loop(1000);
+				menuMusic.start();
+			} else if (gameState == -2) {
+				deathMusic.setMicrosecondPosition(0);
+				deathMusic.start();
+				gameState = -1;
+			} else if (gameState == 1) {
 				gameCanvas.setVisible(false);
 				BackgroundImageForStartMenu.setVisible(true);
+
+				gameMusic.stop();
+				menuMusic.loop(1000);
+				menuMusic.setMicrosecondPosition(0);
+				menuMusic.start();
+
 				rollCredits();
-				gameState = -2;
+				gameState = -1;
 			}
 
 			//UNIT test to see if framerate matches
@@ -175,7 +218,48 @@ public class MainWindow {
 	}
 
 	private static void rollCredits() {
+		int height = 900;
+		int width = 800;
 
+		int X = (960 - width) / 2;
+
+		Credits.setBounds(X, 680, width, height);
+		Credits.setVisible(true);
+
+		for (float Y = 680; Y > -height; Y -= 0.5) {
+			int TimeBetweenFrames = 1000 / TargetFPS;
+			long FrameCheck = System.currentTimeMillis() + (long) TimeBetweenFrames;
+
+			//wait till next time step
+			while (FrameCheck > System.currentTimeMillis()) {
+			}
+
+			Credits.setBounds(X, (int) Y, width, height);
+
+			//UNIT test to see if framerate matches
+			UnitTests.CheckFrameRate(System.currentTimeMillis(), FrameCheck, TargetFPS);
+		}
+
+		Credits.setVisible(false);
+	}
+
+	private void startGame() {
+		gameworld = new Model();
+		gameCanvas = new Viewer(gameworld);
+
+		frame.add(gameCanvas);
+
+		menuMusic.stop();
+		gameMusic.loop(1000);
+		gameMusic.setMicrosecondPosition(0);
+		gameMusic.start();
+
+		gameCanvas.setBounds(0, 0, FrameWidth, FrameHeight);
+		gameCanvas.setBackground(new Color(255, 255, 255)); //white background  replaced by Space background but if you remove the background method this will draw a white screen
+		gameCanvas.setVisible(true);
+		gameCanvas.addKeyListener(Controller);    //adding the controller to the Canvas
+		gameCanvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
+		gameState = 0;
 	}
 
 	//Basic Model-View-Controller pattern

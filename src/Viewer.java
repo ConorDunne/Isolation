@@ -1,16 +1,15 @@
 import util.GameObject;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 import java.util.List;
-
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
+import java.util.Random;
 
 
 /*
@@ -79,17 +78,17 @@ public class Viewer extends JPanel {
 		//Draw player Game Object
 		int x = (int) gameworld.getPlayer().getCentre().getX();
 		int y = (int) gameworld.getPlayer().getCentre().getY();
-		int width = (int) gameworld.getPlayer().getWidth();
-		int height = (int) gameworld.getPlayer().getHeight();
+		int width = gameworld.getPlayer().getWidth();
+		int height = gameworld.getPlayer().getHeight();
 		String texture = gameworld.getPlayer().getTexture();
 		float fuel = gameworld.getFuel();
 
 		drawBackground(g);
 		drawMap(g);
 		drawOil(g);
-		drawPlayer(x, y, width, height, texture,g);
+		drawPlayer(x, y, width, height, texture, g);
 
-		drawAura(x+(width/2), y+(height/2), fuel, "res/GUI/Levels/smoke.jpg", g);
+		drawAura(x + (width / 2), y + (height / 2), fuel, "res/GUI/Levels/smoke.jpg", g);
 	}
 
 	private void drawOil(Graphics g) {
@@ -130,14 +129,14 @@ public class Viewer extends JPanel {
 	}
 
 	private void drawPlayer(int x, int y, int width, int height, String texture, Graphics g) {
-		File TextureToLoad = new File(texture);  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE
+		int currentPositionInAnimation = ((int) ((CurrentAnimationTime % 40) / 10));
+		File TextureToLoad = new File(texture + currentPositionInAnimation + ".png");  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE
 		try {
 			Image myImage = ImageIO.read(TextureToLoad);
 			//The spirte is 32x32 pixel wide and 4 of them are placed together so we need to grab a different one each time
 			//remember your training :-) computer science everything starts at 0 so 32 pixels gets us to 31
 			//int currentPositionInAnimation= ((int) ((CurrentAnimationTime%40)/10))*32; //slows down animation so every 10 frames we get another frame so every 100ms
 			g.drawRect(x, y, width, height);
-			g.drawImage(myImage, x,y, width, height, null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
