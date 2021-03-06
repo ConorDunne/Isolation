@@ -136,11 +136,15 @@ public class MainWindow {
 			DataLine.Info mInfo = new DataLine.Info(Clip.class, menuAudio.getFormat());
 			menuMusic = (Clip) AudioSystem.getLine(mInfo);
 			menuMusic.open(menuAudio);
+			FloatControl menuControl = (FloatControl) menuMusic.getControl(FloatControl.Type.MASTER_GAIN);
+			menuControl.setValue(-5.0f);
 
 			AudioInputStream gameAudio = AudioSystem.getAudioInputStream(game);
 			DataLine.Info gInfo = new DataLine.Info(Clip.class, gameAudio.getFormat());
 			gameMusic = (Clip) AudioSystem.getLine(gInfo);
 			gameMusic.open(gameAudio);
+			FloatControl gameControl = (FloatControl) gameMusic.getControl(FloatControl.Type.MASTER_GAIN);
+			gameControl.setValue(-5.0f);
 
 			AudioInputStream deathAudio = AudioSystem.getAudioInputStream(death);
 			DataLine.Info dInfo = new DataLine.Info(Clip.class, deathAudio.getFormat());
